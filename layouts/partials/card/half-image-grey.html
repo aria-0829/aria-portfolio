@@ -1,0 +1,129 @@
+
+<div class="half-card">
+	{{ $bg := "" }}
+	{{ $param := .Params.featuredImage }}
+	{{ if $param }}
+		{{ $p := strings.TrimSpace $param }}
+		{{ if or (strings.HasPrefix $p "http:") (strings.HasPrefix $p "https:") }}
+			{{ $bg = $p }}
+		{{ else }}
+			{{ $res := .Resources.GetMatch $p }}
+			{{ if not $res }}{{ $res = (.Resources.GetMatch (printf "**/%s" $p)) }}{{ end }}
+			{{ if $res }}
+				{{ $bg = $res.RelPermalink }}
+			{{ else }}
+				{{ $bg = (relURL $p) }}
+			{{ end }}
+		{{ end }}
+	{{ else }}
+		{{ $pageImages := .Resources.ByType "image" }}
+		{{ $feat := "" }}
+		{{ range slice "*featured*" "*cover*" "*thumbnail*" }}
+			{{ if not $feat }}{{ $match := $pageImages.GetMatch . }}{{ with $match }}{{ $feat = .RelPermalink }}{{ end }}{{ end }}
+		{{ end }}
+		{{ if $feat }}
+			{{ $bg = $feat }}
+		{{ else }}
+			{{ $bg = (.Site.Params.defaultFeaturedImage | default "/img/blowfish_logo.png") }}
+		{{ end }}
+	{{ end }}
+
+	<a class="half-card__image-link" href="{{ .RelPermalink }}" aria-label="{{ .Title }}">
+		<div class="half-card__image" style="background-image:url('{{ $bg }}');"></div>
+	</a>
+	<div class="half-card__text">
+		{{ $label := "" }}
+		{{ $labelURL := "" }}
+		{{ with .Params.collections }}
+			{{ $label = (index . 0) }}
+			{{ $labelURL = (print "/collections/" (urlize $label) "/") }}
+		{{ else }}
+			{{ with .Params.collection }}
+				{{ $label = (index . 0) }}
+				{{ $labelURL = (print "/collections/" (urlize $label) "/") }}
+			{{ else }}
+				{{ with .Params.categories }}
+					{{ $label = (index . 0) }}
+					{{ $labelURL = (print "/categories/" (urlize $label) "/") }}
+				{{ else }}
+					{{ with .Params.tags }}
+						{{ $label = (index . 0) }}
+						{{ $labelURL = (print "/tags/" (urlize $label) "/") }}
+					{{ end }}
+				{{ end }}
+			{{ end }}
+		{{ end }}
+
+		{{ if $label }}
+			<div class="half-card__label"><a href="{{ $labelURL }}">{{ $label }}</a></div>
+		{{ end }}
+
+		<h3 class="half-card__title"><a href="{{ .RelPermalink }}">{{ .Title }}</a></h3>
+		{{ with .Params.summary }}
+			<p class="half-card__summary">{{ . }}</p>
+		{{ else }}
+			{{ with .Summary }}<p class="half-card__summary">{{ . }}</p>{{ end }}
+		{{ end }}
+	</div>
+</div>
+
+<style>
+.half-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  margin: 1rem 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgb(var(--color-neutral-600));
+}
+.half-card__image-link {
+  flex: 1 1 300px;
+  display: block;
+  overflow: hidden;
+}
+.half-card__image {
+  min-height: 200px;
+  background-size: cover;
+  background-position: center;
+  transform: scale(1);
+  transition: transform .35s ease;
+}
+.half-card__image-link:hover .half-card__image,
+.half-card__image-link:focus .half-card__image {
+  transform: scale(1.05);
+}
+.half-card__text {
+  flex: 1 1 300px;
+  background-color: rgb(var(--color-neutral-900));
+  color: rgb(var(--color-neutral-50));
+  padding: 1.5rem;
+}
+.half-card__label {
+  font-size: .85rem;
+  color: rgb(var(--color-primary-400));
+  margin: 0 0 .5rem 0;
+  text-transform: none;
+  font-weight: 700;
+  letter-spacing: .02em;
+}
+.half-card__label a {
+  color: rgb(var(--color-primary-400));
+  text-decoration: none;
+}
+.half-card__title { 
+    margin: 0 0 .5rem 0; 
+    font-size: 2rem; 
+    line-height: 1.2 
+}
+.half-card__title a { 
+    text-decoration: none; 
+    color: inherit 
+}
+.half-card__summary { 
+    margin: 0; 
+    color: rgb(var(--color-neutral-300)); 
+    font-size: 1rem 
+}
+@media (min-width: 900px) { .half-card__image { min-height: 260px } }
+</style>

@@ -1,0 +1,7 @@
+{{ $icon := resources.Get "TL_dark.png" }}
+{{ with $icon }}
+<link rel="icon" type="image/png" sizes="32x32" href="{{ .RelPermalink }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ .RelPermalink }}">
+<link rel="apple-touch-icon" href="{{ .RelPermalink }}">
+<link rel="shortcut icon" href="{{ .RelPermalink }}">
+{{ end }}
